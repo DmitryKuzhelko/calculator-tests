@@ -1,18 +1,14 @@
 package dmitry.kuzhelko.calculator.storage
 
-import android.util.Log
 import dmitry.kuzhelko.calculator.storage.entity.Expression
-import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.Executors
 
 
 class LocalStorageImpl(private val database: ExampleDatabase) : LocalStorage {
 
     override fun saveExpression(example: String) {
-        Completable.fromAction { database.exampleDao().saveExample(Expression(value = example)) }
-                .subscribeOn(Schedulers.io())
-        Log.i("LocalStorageImpl", "example = $example")
+        Executors.newSingleThreadExecutor().execute { database.exampleDao().saveExample(Expression(value = example)) }
     }
 
     override fun getExpressionById(id: Int?): Single<Expression> {
