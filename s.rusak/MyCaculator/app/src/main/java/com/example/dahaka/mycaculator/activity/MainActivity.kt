@@ -11,6 +11,7 @@ import android.widget.Button
 import com.example.dahaka.mycaculator.R
 import com.example.dahaka.mycaculator.adapter.ViewModelAdapter
 import com.example.dahaka.mycaculator.model.CalculatorViewModel
+import com.example.dahaka.mycaculator.model.History
 import com.example.dahaka.mycaculator.util.daggerComponent
 import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity(), ViewModelAdapter.ItemClickListener {
 
     @Inject
     lateinit var viewModel: CalculatorViewModel
+    private val historyList = mutableListOf<History>()
 
     private val adapter: ViewModelAdapter by lazy {
         ViewModelAdapter(this, this)
@@ -31,6 +33,11 @@ class MainActivity : AppCompatActivity(), ViewModelAdapter.ItemClickListener {
         initRV()
         viewModel.historyList().observe(this, Observer { history ->
             adapter.refreshHistoryList(history)
+            history?.forEach {
+                if (!historyList.contains(it)) {
+                    historyList.add(it)
+                }
+            }
         })
         viewModel.showDisplay().observe(this, Observer { text ->
             display.text = text
@@ -86,11 +93,7 @@ class MainActivity : AppCompatActivity(), ViewModelAdapter.ItemClickListener {
     }
 
     override fun onItemClicked(viewHolder: ViewModelAdapter.ViewHolder) {
-        viewModel.historyList().observe(this, Observer { history ->
-            if (history?.isNotEmpty()!!) {
-                viewModel.setHistoryValue(history[viewHolder.adapterPosition].expression)
-            }
-        })
+        viewModel.setHistoryValue(historyList[viewHolder.adapterPosition].expression)
         showOrHideHistory()
     }
 }
